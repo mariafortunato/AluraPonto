@@ -127,13 +127,27 @@ extension ReciboViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 120
     }
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        // recuperar recibo
+        let recibo = buscador.fetchedObjects?[indexPath.row]
+        
+        let mapaViewController = MapaViewController.instanciar(recibo)
+        
+        // abrir de baixo para cima
+        mapaViewController.modalPresentationStyle = .automatic
+        
+        present(mapaViewController, animated: true, completion: nil)
+    }
 }
 
 extension ReciboViewController: ReciboTableViewCellDelegate {
     func deletarRecibo(_ index: Int) {
-        guard let recibo = buscador.fetchedObjects?[index] else {return} // index do recibo para deletar
-        
-        recibo.deletar(contexto)
+        AutenticacaoLocal().autorizaUsuario { autenticado in
+            if autenticado {
+                guard let recibo = self.buscador.fetchedObjects?[index] else {return} // index do recibo para deletar
+                recibo.deletar(self.contexto)
+            }
+        }
     }
 }
 extension ReciboViewController: CameraDelegate {

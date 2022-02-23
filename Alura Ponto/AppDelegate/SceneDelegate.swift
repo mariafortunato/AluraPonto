@@ -9,6 +9,10 @@ import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
+    enum TipoDeShortcut: String {
+        case registrarPonto = "RegistrarPonto"      // exatamente igual ao title de info
+    }
+    
     var window: UIWindow?
 
 
@@ -31,14 +35,37 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let reciboController = ReciboViewController()
         reciboController.tabBarItem = reciboTabItem
         
-        let tabBarController = UITabBarController()
+        let tabBarController = UITabBarController()  // barrinha embaixo com os 2 viewcontroleler
         tabBarController.viewControllers = [homeController, reciboController]
         tabBarController.selectedViewController = homeController
         
-        window?.rootViewController = tabBarController
+        let navigationController = UINavigationController(rootViewController: tabBarController)
+        navigationController.navigationBar.isHidden =  true // tirar barra de cima q apareceu
+        
+        window?.rootViewController = navigationController
         window?.makeKeyAndVisible()
     }
-
+    
+    // abrir direto a camera ao clicar na tela principal em registrar ponto 
+    func windowScene(_ windowScene: UIWindowScene, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
+        
+        if let tipo = TipoDeShortcut(rawValue: shortcutItem.type){
+            switch tipo {
+            case .registrarPonto:
+                let navigationController = window?.rootViewController as? UINavigationController
+                
+                // ja temos o tabbar se entrar aq
+                if let tabBarController = navigationController?.viewControllers.first as? UITabBarController {
+                    navigationController?.popToRootViewController(animated: true) // volta no view controller inicial (home)
+                    
+                    if let home = tabBarController.viewControllers?.first as? HomeViewController {
+                        home.tentaAbrirCamera()
+                    }
+                }
+            }
+        }
+    }
+    
     func sceneDidDisconnect(_ scene: UIScene) {
         // Called as the scene is being released by the system.
         // This occurs shortly after the scene enters the background, or when its session is discarded.

@@ -7,6 +7,7 @@
 
 import UIKit
 import CoreData
+import CoreLocation
 
 class HomeViewController: UIViewController {
 
@@ -22,6 +23,8 @@ class HomeViewController: UIViewController {
            // lazt: so sera inicializada(instanciada) quando for chamada no codigo
     private lazy var camera = Camera()
     private lazy var controladorDeImagem = UIImagePickerController()
+    private var latitude: CLLocationDegrees?
+    private var longitude: CLLocationDegrees?
     
     var contexto: NSManagedObjectContext = {
         let contexto = UIApplication.shared.delegate as! AppDelegate
@@ -29,12 +32,16 @@ class HomeViewController: UIViewController {
         return contexto.persistentContainer.viewContext
     }()
     
+    lazy var gerenciadorLocalizacao = CLLocationManager()
+    private lazy var localizacao = Localizacao()
+    
     // MARK: - View life cycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
         configuraView()
         atualizaHorario()
+        requisicaoLocalizacaoUsuario()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -79,6 +86,11 @@ class HomeViewController: UIViewController {
         }
     }
     
+    func requisicaoLocalizacaoUsuario() {
+        localizacao.delegate = self
+        localizacao.permissao(gerenciadorLocalizacao)
+    }
+    
     // MARK: - IBActions
     
     @IBAction func registrarButton(_ sender: UIButton) {
@@ -88,8 +100,14 @@ class HomeViewController: UIViewController {
 }
 extension HomeViewController: CameraDelegate {
     func didSelectFoto(_ image: UIImage) { //
-        let recibo = Recibo(status: false, data: Date(), foto: image) // cria o recibo
+        let recibo = Recibo(status: false, data: Date(), foto: image, latitude: latitude ?? 0.0, longitude: longitude ?? 0.0) // cria o recibo
                
         recibo.salvar(contexto)
+    }
+}
+extension HomeViewController: localizacaoDelegate {
+    func atualizaLocalizacaoUsuario(latitude: Double?, longitude: Double?) {
+        self.latitude = latitude ?? 0.0
+        self.longitude = longitude ?? 0.0
     }
 }
