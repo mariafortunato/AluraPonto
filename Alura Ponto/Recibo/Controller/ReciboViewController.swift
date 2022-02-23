@@ -48,13 +48,20 @@ class ReciboViewController: UIViewController {
         configuraTableView()
         configuraViewFoto()
         buscador.delegate = self
+        
     }
     
     override func viewDidAppear(_ animated: Bool) {
         getRecibos()
+        getFotoPerfil()
         reciboTableView.reloadData()
     }
     
+    func getFotoPerfil() {              //metodo
+        if let imagemPerfil = Perfil().carregarImagem() {
+            fotoPerfilImageView.image = imagemPerfil  // setando imagem no uiimage
+        }
+    }
     // MARK: - Class methods
     func getRecibos() {
         Recibo.carregar(buscador)
@@ -132,6 +139,7 @@ extension ReciboViewController: ReciboTableViewCellDelegate {
 extension ReciboViewController: CameraDelegate {
     // ao escolher foto, vem para esse metodo
     func didSelectFoto(_ image: UIImage) { // pegar a foto e colocar no perfil
+        Perfil().salvarImagem(image) 
         escolhaFotoButton.isHidden = true // bloquear acesso ao botao de colocar foto
         fotoPerfilImageView.image = image  // é igual a imagem  que recebemos no parametro
         
